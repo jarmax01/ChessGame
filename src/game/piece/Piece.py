@@ -18,6 +18,9 @@ class Piece:
         else:
             return DATA.images["b"+self.pieceType.firstLetter]
 
+    def getPlayableCases(self):
+        pass
+
     moves = []
 
 class PieceType(Enum):

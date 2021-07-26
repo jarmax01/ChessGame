@@ -1,4 +1,3 @@
-import DATA as DATA
 import pygame as pygame
 
 from src.game.piece import *
@@ -7,7 +6,7 @@ from src.game.piece.King import King
 from src.game.piece.Knight import Knight
 from src.game.piece.Pawn import Pawn
 
-from src.game.piece.Piece import PieceType
+from src.game.piece.Piece import PieceType, Piece
 from src.game.piece.Queen import Queen
 from src.game.piece.Rook import Rook
 
@@ -15,6 +14,24 @@ HEIGHT = 800
 WIDTH = 800
 DIMENSION = 8
 SQ_SIZE = HEIGHT//DIMENSION
+
+GREEN_COLOR = pygame.Color(116,149,92)
+WHITE_COLOR = pygame.Color(239,238,212)
+
+GREEN_RED_COLOR = pygame.Color(212, 108, 81)
+WHITE_RED_COLOR = pygame.Color(236, 126, 106)
+
+GREEN_GREEN_COLOR = pygame.Color(162, 195, 88)
+WHITE_GREEN_COLOR = pygame.Color(186, 213, 113)
+
+WHITE_SELECTED_COLOR = pygame.Color(246, 246, 105)
+GREEN_SELECTED_COLOR = pygame.Color(186, 202, 43)
+
+WHITE_CIRCLE_COLOR = pygame.Color(214, 214, 189)
+GREEN_CIRCLE_COLOR = pygame.Color(106, 135, 77)
+
+isShifting = False
+selectedPiece: Piece = None
 
 images = {}
 
@@ -56,11 +73,18 @@ pieces = {
     Rook((8, 8), True, PieceType.ROOK, True),
 }
 
+shift_right_clicked_cases = []
+right_clicked_cases = []
 
+
+def getPieceByCase(position):
+    for piece in pieces:
+        if piece.position[0] == position[0] and piece.position[1] == position[1]:
+            return piece
+    return None
 
 def loadImages():
     piecesName = ["bB", "bK", "bN", "bP", "bQ", "bR", "wB", "wK", "wN", "wP", "wQ", "wR"]
     for pieceName in piecesName:
-        print("ressources/"+pieceName+".png")
-        images[pieceName] = pygame.transform.scale(pygame.image.load("/Users/maxime/PycharmProjects/ChessProject/ressources/"+pieceName+ ".png"), (DATA.SQ_SIZE,DATA.SQ_SIZE))
+        images[pieceName] = pygame.transform.scale(pygame.image.load('C:\\Users\\Dell\\PycharmProjects\\ChessGame\\ressources\\' +pieceName +'.png'), (SQ_SIZE,SQ_SIZE))
 
