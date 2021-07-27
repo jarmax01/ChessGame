@@ -21,6 +21,12 @@ class Piece:
     def getPlayableCases(self):
         pass
 
+    def getAttackableCases(self):
+        pass
+
+    def tryMoveTo(self, position):
+        pass
+
     moves = []
 
 class PieceType(Enum):

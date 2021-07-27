@@ -41,13 +41,24 @@ def run():
                 button = event.button
                 # Left click
                 if button == 1:
-                    piece = getPieceByCase(getCase(pygame.mouse.get_pos()))
-                    if piece is not None:
-                        DATA.selectedPiece = piece
-                    else:
-                        DATA.selectedPiece.moveTo(getCase(pygame.mouse.get_pos()))
+                    targetCase = getCase(pygame.mouse.get_pos())
+                    targetPiece = getPieceByCase(targetCase)
+                    selectedPiece = DATA.selectedPiece
 
-                    pass
+                    if selectedPiece is not None:
+                        if targetPiece is not None:
+                            if selectedPiece.getAttackableCases().__contains__(targetPiece.position):
+                                selectedPiece.position = targetPiece.position
+                                targetPiece.alive = False
+                            else:
+                                DATA.selectedPiece = targetPiece
+                        else:
+                            selectedPiece.tryMoveTo(targetCase)
+                            pass
+                    else:
+                        if targetPiece is not None:
+                            DATA.selectedPiece = targetPiece
+
                 # Right click
                 elif button == 3:
                     if DATA.isShifting:
@@ -88,28 +99,31 @@ def drawBoard(screen):
                 color = colors[((row + col) % 2)]
             pygame.draw.rect(screen, color, pygame.Rect(col * 100, row * 100, 100, 100))
 
-    # Col twice because rectangle override circle
+    # Call twice because rectangle override circle
     for row in range(DATA.DIMENSION):
         for col in range(DATA.DIMENSION):
-            isWhite = (((row + col) % 2) == 0)
             caseRow = row + 1
             caseCol = col + 1
             if DATA.selectedPiece is not None and DATA.selectedPiece.position == (caseCol, caseRow):
-                if isWhite:
-                    color = DATA.WHITE_SELECTED_COLOR
-                else:
-                    color = DATA.GREEN_SELECTED_COLOR
-
                 for piece in DATA.selectedPiece.getPlayableCases():
                     piece_col = piece[0]
                     piece_row = piece[1]
-                    print(piece_col, piece_row)
                     center = (((piece_col - 1) * 100 + 50), ((piece_row - 1) * 100 + 50))
-                    print(center)
                     if isCaseWhite((piece_col, piece_row)):
                         pygame.draw.circle(screen, DATA.WHITE_CIRCLE_COLOR, center, 16)
                     else:
                         pygame.draw.circle(screen, DATA.GREEN_CIRCLE_COLOR, center, 16)
+                for piece in DATA.selectedPiece.getAttackableCases():
+                    piece_col = piece[0]
+                    piece_row = piece[1]
+                    attackablePiece = getPieceByCase((piece_col, piece_row))
+                    if attackablePiece is not None and DATA.selectedPiece.isWhite != attackablePiece.isWhite:
+                        center = (((piece_col - 1) * 100 + 50), ((piece_row - 1) * 100 + 50))
+                        if isCaseWhite((piece_col, piece_row)):
+                            pygame.draw.circle(screen, DATA.WHITE_ATTACKABLE_COLOR, center, 50, 7)
+                        else:
+                            pygame.draw.circle(screen, DATA.GREEN_ATTACKABLE_COLOR, center, 50, 7)
+
 
 
 def drawPiece(screen):

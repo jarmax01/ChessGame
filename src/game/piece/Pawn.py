@@ -31,7 +31,8 @@ class Pawn(Piece):
 
     def getAttackableCases(self):
         if self.isWhite:
-            theoreticalCases = [(self.position[0]-1, self.position[1] - 1), (self.position[0]+1, self.position[1] - 1)]
+            theoreticalCases = [(self.position[0] - 1, self.position[1] - 1),
+                                (self.position[0] + 1, self.position[1] - 1)]
 
             attackableCases = []
             for case in theoreticalCases:
@@ -39,7 +40,8 @@ class Pawn(Piece):
                     attackableCases.append(case)
             return attackableCases
         else:
-            theoreticalCases = [(self.position[0] - 1, self.position[1] + 1),(self.position[0] + 1, self.position[1] + 1)]
+            theoreticalCases = [(self.position[0] - 1, self.position[1] + 1),
+                                (self.position[0] + 1, self.position[1] + 1)]
 
             attackableCases = []
             for case in theoreticalCases:
@@ -47,10 +49,9 @@ class Pawn(Piece):
                     attackableCases.append(case)
             return attackableCases
 
-
-
-    def moveTo(self, position):
-        self.position = position
-        self.hasAlreadyMoved = True
-        if DATA.selectedPiece == self:
-            DATA.selectedPiece = None
+    def tryMoveTo(self, position):
+        if self.getPlayableCases().__contains__(position):
+            self.position = position
+            self.hasAlreadyMoved = True
+            if DATA.selectedPiece == self:
+                DATA.selectedPiece = None
