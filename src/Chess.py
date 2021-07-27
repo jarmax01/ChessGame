@@ -48,10 +48,12 @@ def run():
                     if selectedPiece is not None:
                         if targetPiece is not None:
                             if selectedPiece.getAttackableCases().__contains__(targetPiece.position):
-                                selectedPiece.position = targetPiece.position
-                                targetPiece.alive = False
+                                selectedPiece.tryAttackTo(targetCase)
                             else:
-                                DATA.selectedPiece = targetPiece
+                                if targetPiece == selectedPiece:
+                                    DATA.selectedPiece = None
+                                else:
+                                    DATA.selectedPiece = targetPiece
                         else:
                             selectedPiece.tryMoveTo(targetCase)
                             pass
@@ -116,14 +118,11 @@ def drawBoard(screen):
                 for piece in DATA.selectedPiece.getAttackableCases():
                     piece_col = piece[0]
                     piece_row = piece[1]
-                    attackablePiece = getPieceByCase((piece_col, piece_row))
-                    if attackablePiece is not None and DATA.selectedPiece.isWhite != attackablePiece.isWhite:
-                        center = (((piece_col - 1) * 100 + 50), ((piece_row - 1) * 100 + 50))
-                        if isCaseWhite((piece_col, piece_row)):
-                            pygame.draw.circle(screen, DATA.WHITE_ATTACKABLE_COLOR, center, 50, 7)
-                        else:
-                            pygame.draw.circle(screen, DATA.GREEN_ATTACKABLE_COLOR, center, 50, 7)
-
+                    center = (((piece_col - 1) * 100 + 50), ((piece_row - 1) * 100 + 50))
+                    if isCaseWhite((piece_col, piece_row)):
+                        pygame.draw.circle(screen, DATA.WHITE_ATTACKABLE_COLOR, center, 50, 7)
+                    else:
+                        pygame.draw.circle(screen, DATA.GREEN_ATTACKABLE_COLOR, center, 50, 7)
 
 
 def drawPiece(screen):
@@ -145,7 +144,8 @@ def isCaseWhite(position):
 def getPieceByCase(position):
     for piece in DATA.pieces:
         if piece.position[0] == position[0] and piece.position[1] == position[1]:
-            return piece
+            if piece.alive:
+                return piece
     return None
 
 

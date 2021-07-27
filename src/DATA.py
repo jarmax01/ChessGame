@@ -1,5 +1,6 @@
 import pygame as pygame
 
+from src.game.Move import Move
 from src.game.piece import *
 from src.game.piece.Bishop import Bishop
 from src.game.piece.King import King
@@ -37,6 +38,9 @@ isShifting = False
 selectedPiece: Piece = None
 
 images = {}
+
+moves = []
+
 
 pieces = {
     Rook((1, 1), True, PieceType.ROOK, False),
@@ -79,12 +83,6 @@ pieces = {
 shift_right_clicked_cases = []
 right_clicked_cases = []
 
-
-def getPieceByCase(position):
-    for piece in pieces:
-        if piece.position[0] == position[0] and piece.position[1] == position[1]:
-            return piece
-    return None
 
 def loadImages():
     piecesName = ["bB", "bK", "bN", "bP", "bQ", "bR", "wB", "wK", "wN", "wP", "wQ", "wR"]

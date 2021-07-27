@@ -1,9 +1,16 @@
 from src import DATA
+from src.game.Move import Move
 from src.game.piece.Piece import Piece
 
 
 class Pawn(Piece):
     hasAlreadyMoved = False
+
+    def getPieceByCase(self, piecePosition):
+        for piece in DATA.pieces:
+            if piece.position[0] == piecePosition[0] and piece.position[1] == piecePosition[1]:
+                return piece
+        return None
 
     def getPlayableCases(self):
         if self.isWhite:
@@ -37,7 +44,9 @@ class Pawn(Piece):
             attackableCases = []
             for case in theoreticalCases:
                 if 8 >= case[1] >= 1:
-                    attackableCases.append(case)
+                    if self.getPieceByCase(case) is not None:
+                        if self.getPieceByCase(case).isWhite != self.isWhite:
+                            attackableCases.append(case)
             return attackableCases
         else:
             theoreticalCases = [(self.position[0] - 1, self.position[1] + 1),
@@ -46,12 +55,24 @@ class Pawn(Piece):
             attackableCases = []
             for case in theoreticalCases:
                 if 8 >= case[1] >= 1:
-                    attackableCases.append(case)
+                    if self.getPieceByCase(case) is not None:
+                        if self.getPieceByCase(case).isWhite != self.isWhite:
+                            attackableCases.append(case)
             return attackableCases
 
-    def tryMoveTo(self, position):
-        if self.getPlayableCases().__contains__(position):
-            self.position = position
+    def tryMoveTo(self, toPosition):
+        if self.getPlayableCases().__contains__(toPosition):
+            DATA.moves.insert(0, (Move(self.position, toPosition, self)))
+            self.position = toPosition
             self.hasAlreadyMoved = True
+            if DATA.selectedPiece == self:
+                DATA.selectedPiece = None
+
+    def tryAttackTo(self, toPosition):
+        if self.getAttackableCases().__contains__(toPosition):
+            DATA.moves.insert(0, (Move(self.position, toPosition, self)))
+            self.position = toPosition
+            self.hasAlreadyMoved = True
+            self.getPieceByCase(toPosition).alive = False
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None
