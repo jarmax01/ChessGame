@@ -1,9 +1,11 @@
+import pygame
 from src import DATA
 from src.game.Move import Move
 from src.game.piece.Piece import Piece
 
 
 class Knight(Piece):
+
     def getPieceByCase(self, position):
         for piece in DATA.pieces:
             if piece.position[0] == position[0] and piece.position[1] == position[1]:
@@ -27,16 +29,27 @@ class Knight(Piece):
 
         for case in theoreticalCases:
             piece = self.getPieceByCase(case)
-            if piece is None:
-                playableCases.append(case)
-            elif not piece.alive:
-                playableCases.append(case)
-            elif self.isWhite != piece.isWhite:
-                playableCases.append(case)
-            else:
-                continue
+            if 1 <= case[0] <= 8 and 1 <= case[1] <= 8:
+                if piece is None:
+                    playableCases.append(case)
+                elif not piece.alive:
+                    playableCases.append(case)
+                elif self.isWhite != piece.isWhite:
+                    playableCases.append(case)
+                else:
+                    continue
 
-        return playableCases
+
+
+        realPlayableCase = []
+        oldPosition = self.position
+        for playableCase in playableCases:
+            self.position = playableCase
+            if not DATA.getKing(self.isWhite).isCheck():
+                realPlayableCase.append(playableCase)
+            self.position = oldPosition
+
+        return realPlayableCase
 
     def getAttackableCases(self):
         attackableCases = []
@@ -49,6 +62,8 @@ class Knight(Piece):
         if self.getPlayableCases().__contains__(toPosition):
             DATA.moves.insert(0, (Move(self.position, toPosition, self)))
             self.position = toPosition
+            pygame.mixer.Sound.play(DATA.moveSound)
+            DATA.whiteToPlay = not DATA.whiteToPlay
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None
 
@@ -57,6 +72,8 @@ class Knight(Piece):
             DATA.moves.insert(0, (Move(self.position, toPosition, self)))
             self.getPieceByCase(toPosition).alive = False
             self.position = toPosition
+            pygame.mixer.Sound.play(DATA.captureSound)
+            DATA.whiteToPlay = not DATA.whiteToPlay
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None
 

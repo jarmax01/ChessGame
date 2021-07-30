@@ -1,3 +1,5 @@
+import pygame
+
 from src import DATA
 from src.game.Move import Move
 from src.game.piece.Piece import Piece
@@ -13,6 +15,7 @@ class Bishop(Piece):
         return None
 
     def getPlayableCases(self):
+        theoreticalCases = []
         playableCases = []
         directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))
         currentRow = self.position[0]
@@ -24,16 +27,26 @@ class Bishop(Piece):
                 if 1 <= endCol <= 8 and 1 <= endRow <= 8:
                     casePiece = self.getPieceByCase((endRow, endCol))
                     if casePiece is None:
-                        playableCases.append((endRow, endCol))
+                        theoreticalCases.append((endRow, endCol))
                     elif not casePiece.alive:
-                        playableCases.append((endRow, endCol))
+                        theoreticalCases.append((endRow, endCol))
                     elif casePiece.isWhite != self.isWhite:
-                        playableCases.append((endRow, endCol))
+                        theoreticalCases.append((endRow, endCol))
                         break
                     else:
                         break
                 else:
                     break
+
+        oldPosition = self.position
+        for playableCase in theoreticalCases:
+            self.position = playableCase
+            if not DATA.getKing(self.isWhite).isCheck():
+               playableCases.append(playableCase)
+            self.position = oldPosition
+
+
+
         return playableCases
 
     def getAttackableCases(self):
@@ -47,6 +60,8 @@ class Bishop(Piece):
         if self.getPlayableCases().__contains__(toPosition):
             DATA.moves.insert(0, (Move(self.position, toPosition, self)))
             self.position = toPosition
+            pygame.mixer.Sound.play(DATA.moveSound)
+            DATA.whiteToPlay = not DATA.whiteToPlay
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None
 
@@ -55,5 +70,7 @@ class Bishop(Piece):
             DATA.moves.insert(0, (Move(self.position, toPosition, self)))
             self.getPieceByCase(toPosition).alive = False
             self.position = toPosition
+            pygame.mixer.Sound.play(DATA.captureSound)
+            DATA.whiteToPlay = not DATA.whiteToPlay
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None

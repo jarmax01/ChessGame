@@ -7,9 +7,14 @@ from src.game.Move import Move
 
 def run():
     pygame.init()
-    screen = pygame.display.set_mode((DATA.HEIGHT, DATA.WIDTH), pygame.NOFRAME)
+
+    DATA.moveSound = pygame.mixer.Sound("/Users/maxime/PycharmProjects/ChessProject/ressources/move.mp3")
+    DATA.captureSound = pygame.mixer.Sound("/Users/maxime/PycharmProjects/ChessProject/ressources/capture.mp3")
+
+    screen = pygame.display.set_mode((DATA.SIZE_HEIGHT, DATA.SIZE_WIDTH), pygame.NOFRAME)
     clock = pygame.time.Clock()
-    screen.fill(pygame.Color("white"))
+    screen.fill(DATA.BOARD_COLOR)
+    pygame.draw.line(screen, DATA.TIME_COLOR_LINE, (1300, DATA.SIZE_WIDTH/2), (1500, DATA.SIZE_WIDTH/2), 3)
 
     DATA.loadImages()
 
@@ -54,13 +59,14 @@ def run():
                                 if targetPiece == selectedPiece:
                                     DATA.selectedPiece = None
                                 else:
-                                    DATA.selectedPiece = targetPiece
+                                    if DATA.whiteToPlay == targetPiece.isWhite:
+                                        DATA.selectedPiece = targetPiece
                         else:
                             selectedPiece.tryMoveTo(targetCase)
-                            pass
                     else:
                         if targetPiece is not None:
-                            DATA.selectedPiece = targetPiece
+                            if DATA.whiteToPlay == targetPiece.isWhite:
+                                DATA.selectedPiece = targetPiece
 
                 # Right click
                 elif button == 3:
@@ -80,6 +86,7 @@ def drawBoard(screen):
             isWhite = (((row + col) % 2) == 0)
             caseRow = row + 1
             caseCol = col + 1
+
 
             if len(DATA.moves) != 0 and (DATA.moves[0].toLocation == (caseCol, caseRow) or DATA.moves[0].fromLocation == (caseCol, caseRow)):
                 if isWhite:
@@ -106,7 +113,7 @@ def drawBoard(screen):
 
             else:
                 color = colors[((row + col) % 2)]
-            pygame.draw.rect(screen, color, pygame.Rect(col * 100, row * 100, 100, 100))
+            pygame.draw.rect(screen, color, pygame.Rect(DATA.BOARD_CORNER[0] + col * 100,DATA.BOARD_CORNER[1] + row * 100, 100, 100))
 
     # Call twice because rectangle override circle
     for row in range(DATA.DIMENSION):
@@ -117,19 +124,32 @@ def drawBoard(screen):
                 for piece in DATA.selectedPiece.getPlayableCases():
                     piece_col = piece[0]
                     piece_row = piece[1]
-                    center = (((piece_col - 1) * 100 + 50), ((piece_row - 1) * 100 + 50))
+                    center = (((piece_col - 1) * 100+ DATA.BOARD_CORNER[0] + 50), ((piece_row - 1) * 100+ DATA.BOARD_CORNER[1] + 50))
                     if isCaseWhite((piece_col, piece_row)):
-                        pygame.draw.circle(screen, DATA.WHITE_CIRCLE_COLOR, center, 16)
+                        if len(DATA.moves) != 0 and (DATA.moves[0].toLocation == (piece_col, piece_row) or DATA.moves[0].fromLocation == (piece_col, piece_row)):
+                            pygame.draw.circle(screen, DATA.WHITE_CIRCLE_PLAYED_COLOR, center, 16)
+                        else:
+                            pygame.draw.circle(screen, DATA.WHITE_CIRCLE_COLOR, center, 16)
+
                     else:
-                        pygame.draw.circle(screen, DATA.GREEN_CIRCLE_COLOR, center, 16)
+                        if len(DATA.moves) != 0 and (DATA.moves[0].toLocation == (piece_col, piece_row) or DATA.moves[0].fromLocation == (piece_col, piece_row)):
+                            pygame.draw.circle(screen, DATA.GREEN_CIRCLE_PLAYED_COLOR, center, 16)
+                        else:
+                            pygame.draw.circle(screen, DATA.GREEN_CIRCLE_COLOR, center, 16)
                 for piece in DATA.selectedPiece.getAttackableCases():
                     piece_col = piece[0]
                     piece_row = piece[1]
-                    center = (((piece_col - 1) * 100 + 50), ((piece_row - 1) * 100 + 50))
+                    center = (((piece_col - 1) * 100 + DATA.BOARD_CORNER[0] + 50), ((piece_row - 1) * 100 + DATA.BOARD_CORNER[1] +50))
                     if isCaseWhite((piece_col, piece_row)):
-                        pygame.draw.circle(screen, DATA.WHITE_ATTACKABLE_COLOR, center, 50, 7)
+                        if len(DATA.moves) != 0 and (DATA.moves[0].toLocation == (piece_col, piece_row) or DATA.moves[0].fromLocation == (piece_col, piece_row)):
+                            pygame.draw.circle(screen, DATA.WHITE_ATTACKABLE_PLAYED_COLOR, center, 50,7)
+                        else:
+                            pygame.draw.circle(screen, DATA.WHITE_ATTACKABLE_COLOR, center, 50,7)
                     else:
-                        pygame.draw.circle(screen, DATA.GREEN_ATTACKABLE_COLOR, center, 50, 7)
+                        if len(DATA.moves) != 0 and (DATA.moves[0].toLocation == (piece_col, piece_row) or DATA.moves[0].fromLocation == (piece_col, piece_row)):
+                            pygame.draw.circle(screen, DATA.GREEN_ATTACKABLE_PLAYED_COLOR, center, 50,7)
+                        else:
+                            pygame.draw.circle(screen, DATA.GREEN_ATTACKABLE_COLOR, center, 50,7)
 
 
 
@@ -137,12 +157,12 @@ def drawPiece(screen):
     for piece in DATA.pieces:
         if piece.alive:
             screen.blit(piece.getImage(),
-                        pygame.Rect((piece.position[0] - 1) * DATA.SQ_SIZE, (piece.position[1] - 1) * DATA.SQ_SIZE,
+                        pygame.Rect(DATA.BOARD_CORNER[0] + (piece.position[0] - 1) * DATA.SQ_SIZE, DATA.BOARD_CORNER[1] +(piece.position[1] - 1) * DATA.SQ_SIZE,
                                     DATA.SQ_SIZE, DATA.SQ_SIZE))
 
 
 def getCase(clickPosition):
-    return ((clickPosition[0] // 100) + 1), ((clickPosition[1] // 100) + 1)
+    return (( (clickPosition[0] - DATA.BOARD_CORNER[0] ) // 100) + 1), (((clickPosition[1] - DATA.BOARD_CORNER[1]) // 100) + 1)
 
 
 def isCaseWhite(position):

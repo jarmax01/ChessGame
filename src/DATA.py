@@ -11,13 +11,19 @@ from src.game.piece.Piece import PieceType, Piece
 from src.game.piece.Queen import Queen
 from src.game.piece.Rook import Rook
 
+SIZE_HEIGHT = 1600
+SIZE_WIDTH = 1000
+
 HEIGHT = 800
 WIDTH = 800
-DIMENSION = 8
-SQ_SIZE = HEIGHT//DIMENSION
 
-GREEN_COLOR = pygame.Color(116,149,92)
-WHITE_COLOR = pygame.Color(239,238,212)
+BOARD_CORNER = (400, 100)
+
+DIMENSION = 8
+SQ_SIZE = HEIGHT // DIMENSION
+
+GREEN_COLOR = pygame.Color(116, 149, 92)
+WHITE_COLOR = pygame.Color(239, 238, 212)
 
 GREEN_RED_COLOR = pygame.Color(212, 108, 81)
 WHITE_RED_COLOR = pygame.Color(236, 126, 106)
@@ -34,21 +40,34 @@ GREEN_CIRCLE_COLOR = pygame.Color(106, 135, 77)
 WHITE_ATTACKABLE_COLOR = pygame.Color(214, 214, 189)
 GREEN_ATTACKABLE_COLOR = pygame.Color(106, 135, 77)
 
-WHITE_MOVE_COLOR = pygame.Color(246, 246, 105)
+WHITE_CIRCLE_PLAYED_COLOR = pygame.Color(224, 220, 128)
+GREEN_CIRCLE_PLAYED_COLOR = pygame.Color(168, 181, 71)
+
+WHITE_ATTACKABLE_PLAYED_COLOR = pygame.Color(224, 220, 128)
+GREEN_ATTACKABLE_PLAYED_COLOR = pygame.Color(168, 181, 71)
+
+WHITE_MOVE_COLOR = pygame.Color(249, 245, 143)
 GREEN_MOVE_COLOR = pygame.Color(186, 202, 43)
 
+BOARD_COLOR = pygame.Color(50, 46, 43)
+TIME_COLOR_LINE = pygame.Color(170, 170, 170)
+
+moveSound = None
+captureSound = None
 
 isShifting = False
 selectedPiece: Piece = None
 
 images = {}
+leftClickCases = []
+
+whiteToPlay = True
 
 moves = []
 
-
 pieces = {
     Rook((1, 1), True, PieceType.ROOK, False),
-    King((2, 1), True, PieceType.KNIGHT, False),
+    Knight((2, 1), True, PieceType.KNIGHT, False),
     Bishop((3, 1), True, PieceType.BISHOP, False),
     Queen((4, 1), True, PieceType.QUEEN, False),
     King((5, 1), True, PieceType.KING, False),
@@ -75,7 +94,7 @@ pieces = {
     Pawn((8, 7), True, PieceType.PAWN, True),
 
     Rook((1, 8), True, PieceType.ROOK, True),
-    King((2, 8), True, PieceType.KNIGHT, True),
+    Knight((2, 8), True, PieceType.KNIGHT, True),
     Bishop((3, 8), True, PieceType.BISHOP, True),
     Queen((4, 8), True, PieceType.QUEEN, True),
     King((5, 8), True, PieceType.KING, True),
@@ -88,8 +107,27 @@ shift_right_clicked_cases = []
 right_clicked_cases = []
 
 
+def getAttackablePiece(white):
+    attackablePieces = []
+    for piece in pieces:
+        if piece.isWhite != white:
+            for pieceAttackable in piece.getAttackableCases():
+                attackablePieces.append(pieceAttackable)
+
+    return attackablePieces
+
+
+def getKing(white):
+    for piece in pieces:
+        if piece.pieceType == PieceType.KING:
+            if piece.isWhite == white:
+                return piece
+    return None
+
+
 def loadImages():
     piecesName = ["bB", "bK", "bN", "bP", "bQ", "bR", "wB", "wK", "wN", "wP", "wQ", "wR"]
     for pieceName in piecesName:
-        images[pieceName] = pygame.transform.scale(pygame.image.load('C:\\Users\\Dell\\PycharmProjects\\ChessGame\\ressources\\' +pieceName +'.png'), (SQ_SIZE,SQ_SIZE))
-
+        images[pieceName] = pygame.transform.scale(
+            pygame.image.load('/Users/maxime/PycharmProjects/ChessProject/ressources/' + pieceName + '.png'),
+            (SQ_SIZE, SQ_SIZE))

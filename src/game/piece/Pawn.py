@@ -1,6 +1,7 @@
 from src import DATA
 from src.game.Move import Move
 from src.game.piece.Piece import Piece
+import pygame as pygame
 
 
 class Pawn(Piece):
@@ -24,7 +25,6 @@ class Pawn(Piece):
             for case in theoreticalCases:
                 if 8 >= case[1] >= 1:
                     playableCases.append(case)
-            return playableCases
         else:
             if self.hasAlreadyMoved:
                 theoreticalCases = [(self.position[0], self.position[1] + 1)]
@@ -35,7 +35,16 @@ class Pawn(Piece):
             for case in theoreticalCases:
                 if 8 >= case[1] >= 1:
                     playableCases.append(case)
-            return playableCases
+
+        realPlayableCases = []
+        oldPosition = self.position
+        for playableCase in playableCases:
+            self.position = playableCase
+            if not DATA.getKing(self.isWhite).isCheck():
+                realPlayableCases.append(playableCase)
+            self.position = oldPosition
+
+        return realPlayableCases
 
     def getAttackableCases(self):
         if self.isWhite:
@@ -48,7 +57,6 @@ class Pawn(Piece):
                     if self.getPieceByCase(case) is not None:
                         if self.getPieceByCase(case).isWhite != self.isWhite:
                             attackableCases.append(case)
-            return attackableCases
         else:
             theoreticalCases = [(self.position[0] - 1, self.position[1] + 1),
                                 (self.position[0] + 1, self.position[1] + 1)]
@@ -59,13 +67,15 @@ class Pawn(Piece):
                     if self.getPieceByCase(case) is not None:
                         if self.getPieceByCase(case).isWhite != self.isWhite:
                             attackableCases.append(case)
-            return attackableCases
+        return attackableCases
 
     def tryMoveTo(self, toPosition):
         if self.getPlayableCases().__contains__(toPosition):
             DATA.moves.insert(0, (Move(self.position, toPosition, self)))
             self.position = toPosition
             self.hasAlreadyMoved = True
+            pygame.mixer.Sound.play(DATA.moveSound)
+            DATA.whiteToPlay = not DATA.whiteToPlay
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None
 
@@ -75,6 +85,8 @@ class Pawn(Piece):
             self.getPieceByCase(toPosition).alive = False
             self.position = toPosition
             self.hasAlreadyMoved = True
+            pygame.mixer.Sound.play(DATA.captureSound)
+            DATA.whiteToPlay = not DATA.whiteToPlay
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None
 
