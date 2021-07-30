@@ -34,6 +34,10 @@ GREEN_CIRCLE_COLOR = pygame.Color(106, 135, 77)
 WHITE_ATTACKABLE_COLOR = pygame.Color(214, 214, 189)
 GREEN_ATTACKABLE_COLOR = pygame.Color(106, 135, 77)
 
+WHITE_MOVE_COLOR = pygame.Color(246, 246, 105)
+GREEN_MOVE_COLOR = pygame.Color(186, 202, 43)
+
+
 isShifting = False
 selectedPiece: Piece = None
 

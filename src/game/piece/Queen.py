@@ -1,59 +1,59 @@
 from src import DATA
+from src.game.Move import Move
 from src.game.piece.Piece import Piece
 
 
 class Queen(Piece):
+
+    def getPieceByCase(self, position):
+        for piece in DATA.pieces:
+            if piece.position[0] == position[0] and piece.position[1] == position[1]:
+                if piece.alive:
+                    return piece
+        return None
+
     def getPlayableCases(self):
-        theoreticalCases = []
-        for i in range(1, 8):
-            theoreticalCases.append((self.position[0] + i, self.position[1]))
-            theoreticalCases.append((self.position[0] - i, self.position[1]))
-            theoreticalCases.append((self.position[0], self.position[1] + i))
-            theoreticalCases.append((self.position[0], self.position[1] - i))
-            theoreticalCases.append((self.position[0] + i, self.position[1] + i))
-            theoreticalCases.append((self.position[0] - i, self.position[1] - i))
-            theoreticalCases.append((self.position[0] - i, self.position[1] + i))
-            theoreticalCases.append((self.position[0] + i, self.position[1] - i))
         playableCases = []
-        for case in theoreticalCases:
-            if 8 >= case[1] >= 1:
-                playableCases.append(case)
+        directions = ((-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1))
+        currentRow = self.position[0]
+        currentCol = self.position[1]
+        for direction in directions:
+            for i in range(1, 8):
+                endRow = currentRow + i * direction[0]
+                endCol = currentCol + i * direction[1]
+                if 1 <= endCol <= 8 and 1 <= endRow <= 8:
+                    casePiece = self.getPieceByCase((endRow, endCol))
+                    if casePiece is None:
+                        playableCases.append((endRow, endCol))
+                    elif not casePiece.alive:
+                        playableCases.append((endRow, endCol))
+                    elif casePiece.isWhite != self.isWhite:
+                        playableCases.append((endRow, endCol))
+                        break
+                    else:
+                        break
+                else:
+                    break
         return playableCases
 
-
-
     def getAttackableCases(self):
-        if self.isWhite:
-            theoreticalCases = []
+        attackableCases = []
+        for case in self.getPlayableCases():
+            if self.getPieceByCase(case) is not None:
+                attackableCases.append(case)
+        return attackableCases
 
-            for i in range(1, 8):
-                theoreticalCases.append((self.position[0] + i, self.position[1]))
-                theoreticalCases.append((self.position[0] - i, self.position[1]))
-                theoreticalCases.append((self.position[0], self.position[1] + i))
-                theoreticalCases.append((self.position[0], self.position[1] - i))
-                theoreticalCases.append((self.position[0] + i, self.position[1] + i))
-                theoreticalCases.append((self.position[0] - i, self.position[1] - i))
-                theoreticalCases.append((self.position[0] - i, self.position[1] + i))
-                theoreticalCases.append((self.position[0] + i, self.position[1] - i))
+    def tryMoveTo(self, toPosition):
+        if self.getPlayableCases().__contains__(toPosition):
+            DATA.moves.insert(0, (Move(self.position, toPosition, self)))
+            self.position = toPosition
+            if DATA.selectedPiece == self:
+                DATA.selectedPiece = None
 
-            attackableCases = []
-            for case in theoreticalCases:
-                if 8 >= case[1] >= 1:
-                    attackableCases.append(case)
-            return attackableCases
-        else:
-            theoreticalCases = [(self.position[0] - 1, self.position[1] + 1),
-                                (self.position[0] + 1, self.position[1] + 1)]
-
-            attackableCases = []
-            for case in theoreticalCases:
-                if 8 >= case[1] >= 1:
-                    attackableCases.append(case)
-            return attackableCases
-
-    def tryMoveTo(self, position):
-        if self.getPlayableCases().__contains__(position):
-            self.position = position
-            self.hasAlreadyMoved = True
+    def tryAttackTo(self, toPosition):
+        if self.getAttackableCases().__contains__(toPosition):
+            DATA.moves.insert(0, (Move(self.position, toPosition, self)))
+            self.getPieceByCase(toPosition).alive = False
+            self.position = toPosition
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None

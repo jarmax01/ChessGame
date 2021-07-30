@@ -6,10 +6,11 @@ from src.game.piece.Piece import Piece
 class Pawn(Piece):
     hasAlreadyMoved = False
 
-    def getPieceByCase(self, piecePosition):
+    def getPieceByCase(self, position):
         for piece in DATA.pieces:
-            if piece.position[0] == piecePosition[0] and piece.position[1] == piecePosition[1]:
-                return piece
+            if piece.position[0] == position[0] and piece.position[1] == position[1]:
+                if piece.alive:
+                    return piece
         return None
 
     def getPlayableCases(self):
@@ -71,8 +72,9 @@ class Pawn(Piece):
     def tryAttackTo(self, toPosition):
         if self.getAttackableCases().__contains__(toPosition):
             DATA.moves.insert(0, (Move(self.position, toPosition, self)))
+            self.getPieceByCase(toPosition).alive = False
             self.position = toPosition
             self.hasAlreadyMoved = True
-            self.getPieceByCase(toPosition).alive = False
             if DATA.selectedPiece == self:
                 DATA.selectedPiece = None
+

@@ -2,6 +2,7 @@ import pygame as pygame
 from pygame import K_RSHIFT, K_LSHIFT
 
 from src import DATA
+from src.game.Move import Move
 
 
 def run():
@@ -80,7 +81,13 @@ def drawBoard(screen):
             caseRow = row + 1
             caseCol = col + 1
 
-            if DATA.shift_right_clicked_cases.__contains__((caseCol, caseRow)):
+            if len(DATA.moves) != 0 and (DATA.moves[0].toLocation == (caseCol, caseRow) or DATA.moves[0].fromLocation == (caseCol, caseRow)):
+                if isWhite:
+                    color = DATA.WHITE_MOVE_COLOR
+                else:
+                    color = DATA.GREEN_MOVE_COLOR
+
+            elif DATA.shift_right_clicked_cases.__contains__((caseCol, caseRow)):
                 if isWhite:
                     color = DATA.WHITE_GREEN_COLOR
                 else:
@@ -123,6 +130,7 @@ def drawBoard(screen):
                         pygame.draw.circle(screen, DATA.WHITE_ATTACKABLE_COLOR, center, 50, 7)
                     else:
                         pygame.draw.circle(screen, DATA.GREEN_ATTACKABLE_COLOR, center, 50, 7)
+
 
 
 def drawPiece(screen):
